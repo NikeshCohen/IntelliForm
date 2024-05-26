@@ -40,7 +40,23 @@ function NewForm({ sideBar }: { sideBar: boolean }) {
     setError(null);
     setIsLoading(true);
 
-    const prompt = `${userInput} Please provide the form in JSON format with the following fields: formTitle, fliedType, formType formSubheading, formFields (each containing fieldName, type (ie. text, email), placeholder, the type of input(ie. input, textarea, checkbox) and label).`;
+    const prompt = `${userInput} Please provide the form in JSON format with the following fields: formTitle, fliedType, formType formSubheading, formFields (each containing fieldName, type (ie. text, email), placeholder, the type of input(ie. input, textarea, checkbox) and label). 
+    
+    Follow these typescript types export interface FormField {
+      fieldName: string;
+      placeholder: string | null;
+      type: string;
+      input: string; // 'input', 'textarea', 'checkbox', 'select', etc.
+      label: string;
+      options?: Array<{ value: string; label: string }>; // Optional for select fields
+    }
+    
+    export interface JsonForm {
+      formId: string;
+      formTitle: string;
+      formSubheading: string;
+      formFields: FormField[];
+    }`;
     const formData = await session.sendMessage(prompt);
 
     if (formData.response.text()) {

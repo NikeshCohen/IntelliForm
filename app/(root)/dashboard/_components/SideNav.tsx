@@ -10,6 +10,7 @@ import NewForm from "./NewForm";
 
 function SideNav() {
   const path = usePathname();
+  console.log(path);
 
   return (
     <nav className="min-h-[850px] shadow-md border-r pr-8 flex flex-col justify-between border-gray-400">
@@ -18,7 +19,7 @@ function SideNav() {
           <Link
             key={item.id}
             href={item.path}
-            className={`flex items-center hover:bg-primary rounded-md mb-4 p-2 gap-3 ransition-colors ${
+            className={`flex items-center hover:bg-primary rounded-md mb-4 p-2 gap-3 transition-colors ${
               path === item.path && "bg-primary"
             }`}
           >

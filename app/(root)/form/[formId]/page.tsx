@@ -1,3 +1,10 @@
+"use client";
+
+import { db } from "@/configs";
+import { forms, userResponses } from "@/configs/schema";
+import { JsonForm, Table } from "@/types";
+import { eq, is } from "drizzle-orm";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,39 +14,94 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { JsonForm } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import FieldEdit from "./FieldEdit";
+import Loading from "@/components/Loading";
+import { useUser } from "@clerk/nextjs";
+import toast from "react-hot-toast";
 
-function FormUi({
-  jsonForm,
-  onFieldUpdate,
-  deleteField,
-}: {
-  jsonForm: JsonForm | null;
-  deleteField: (i: number) => void;
-  onFieldUpdate: (
-    value: { label: string; placeholder: string },
-    index: number
-  ) => void;
-}) {
+type FormRecord = {
+  id: number;
+  formId: string;
+  jsonForm: string;
+  createdBy: string;
+  createdAt: string;
+};
+
+function FormPage({ params }: { params: { formId: string } }) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [jsonForm, setJsonForm] = useState<JsonForm | null>(null);
+  const [record, setRecord] = useState<Table | undefined>(undefined);
+  const [error, setError] = useState<boolean | null>(null);
+
+  const { user } = useUser();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm();
 
-  const onSubmit: SubmitHandler<Record<string, any>> = (data) => {
-    console.log(data);
+  useEffect(() => {
+    setIsLoading(true);
+
+    const getFormData = async () => {
+      try {
+        const res: FormRecord[] = await db
+          .select()
+          .from(forms)
+          .where(eq(forms.formId, params.formId));
+        if (res.length > 0) {
+          setRecord(res[0]);
+          setJsonForm(JSON.parse(res[0].jsonForm));
+        }
+      } catch (error) {
+        console.error("Error fetching form data:", error);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getFormData();
+  }, [params.formId]);
+
+  const onSubmit: SubmitHandler<Record<string, any>> = async (data) => {
+    setIsSubmitting(true);
+    const today = new Date();
+    if (data) {
+      const jsonResponse = JSON.stringify(data);
+
+      const res = await db.insert(userResponses).values({
+        jsonResponse: jsonResponse,
+        createdBy: user?.primaryEmailAddress?.emailAddress ?? "unknown",
+        createdAt: today.toUTCString(),
+        formRef: record?.id ?? 0,
+      });
+
+      if (res) {
+        toast.success("Submitted successfully");
+        reset();
+      } else {
+        toast.error("Unable to submit form");
+      }
+    }
+
+    setIsSubmitting(false);
   };
 
+  {
+    isLoading && <Loading />;
+  }
+
   return (
-    <div className="lg:max-w-[850px] mr-auto border md:p-10 p-5 rounded-lg border-gray-700 ml-auto">
+    <section className="min-h-[90vh] flex md:w-3/4 lg:max-w-4xl mr-auto ml-auto justify-center items-center flex-col">
       <h2 className="font-bold text-3xl text-center">{jsonForm?.formTitle}</h2>
       <p className="text-center pt-2">{jsonForm?.formSubheading}</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         {jsonForm &&
           jsonForm.formFields.map((field, i) => (
             <div key={i} className="pt-4 flex relative flex-col">
@@ -141,22 +203,16 @@ function FormUi({
                   )}
                 </>
               )}
-              <div>
-                <FieldEdit
-                  defaultValue={field}
-                  onUpdate={(value) => onFieldUpdate(value, i)}
-                  deleteField={() => deleteField(i)}
-                />
-              </div>
+              <div></div>
             </div>
           ))}
 
-        <Button type="submit" className="mt-6 w-full">
-          Submit
+        <Button type="submit" disabled={isSubmitting} className="mt-6 w-full">
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </form>
-    </div>
+    </section>
   );
 }
 
-export default FormUi;
+export default FormPage;

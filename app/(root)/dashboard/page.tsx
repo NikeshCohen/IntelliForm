@@ -1,3 +1,4 @@
+import FormList from "./_components/FormList";
 import MobileSideNav from "./_components/MobileSideNav";
 import NewForm from "./_components/NewForm";
 
@@ -14,6 +15,10 @@ function page() {
           <NewForm sideBar={false} />
         </div>
       </div>
+
+      <h2 className="text-lg mb-4">List of Forms</h2>
+
+      <FormList />
     </section>
   );
 }
