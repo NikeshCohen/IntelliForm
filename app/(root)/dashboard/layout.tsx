@@ -5,7 +5,7 @@ function layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex gap-4">
       <div className="lg:w-64 lg:block hidden">
-        <SideNav />
+        <SideNav isMobile={false} />
       </div>
 
       {children}
