@@ -19,7 +19,7 @@ function MobileSideNav() {
         <SheetTrigger>
           <Menu />
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="border-gray-600">
           <SheetHeader>
             <Link href="/" className="flex items-center gap-1">
               <Image
@@ -35,8 +35,8 @@ function MobileSideNav() {
             </Link>
           </SheetHeader>
 
-          <div className="text-text pt-10">
-            <SideNav />
+          <div className="text-text pt-4">
+            <SideNav isMobile={true} />
           </div>
         </SheetContent>
       </Sheet>

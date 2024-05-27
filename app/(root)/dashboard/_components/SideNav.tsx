@@ -8,12 +8,16 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import NewForm from "./NewForm";
 
-function SideNav() {
+function SideNav({ isMobile = false }: { isMobile: boolean }) {
   const path = usePathname();
-  console.log(path);
-
   return (
-    <nav className="min-h-[850px] shadow-md border-r pr-8 flex flex-col justify-between border-gray-400">
+    <nav
+      className={`${
+        isMobile
+          ? "border-gray-800 h-dvh justify-between pb-28"
+          : "border-r border-gray-400 pr-8 min-h-[850px] justify-between"
+      }  shadow-md flex flex-col`}
+    >
       <div>
         {sideBarItems.map((item) => (
           <Link
@@ -30,8 +34,8 @@ function SideNav() {
       </div>
 
       <div>
-        <div className="mr-8 mb-6">
-          <NewForm sideBar={true} />
+        <div className="mb-6">
+          <NewForm sideBar={false} />
         </div>
         <Progress value={33} />
         <p className="pt-2 text-xs">

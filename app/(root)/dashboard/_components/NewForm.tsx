@@ -82,7 +82,7 @@ function NewForm({ sideBar }: { sideBar: boolean }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className={`${sideBar && "w-[220px]"}`}>New Form</Button>
+        <Button className="w-full">New Form</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
